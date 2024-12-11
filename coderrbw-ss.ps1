@@ -39,12 +39,13 @@ Clear-Host
 
 Write-Host "";
 Write-Host "";
-Write-Host -ForegroundColor Red "                    _                _             ";
-Write-Host -ForegroundColor Red "                   | |              | |            ";
-Write-Host -ForegroundColor Red "       ___ ___   __| | ___ _ __ _ __| |____      __";
-Write-Host -ForegroundColor Red "      / __/ _ \ / _` |/ _ \ '__| '__| '_ \ \ /\ / /";
-Write-Host -ForegroundColor Red "     | (_| (_) | (_| |  __/ |  | |  | |_) \ V  V /";
-Write-Host -ForegroundColor Red "      \___\___/ \__,_|\___|_|  |_|  |_.__/ \_/\_/ ";
+Write-Host -ForegroundColor Red "                     _           _             ";
+Write-Host -ForegroundColor Red "                    | |         | |            ";
+Write-Host -ForegroundColor Red "        ___ ___   __| | ___ _ __| |____      __";
+Write-Host -ForegroundColor Red "       / __/ _ \ / _` |/ _ \ '__| '_ \ \ /\ / /";
+Write-Host -ForegroundColor Red "      | (_| (_) | (_| |  __/ |  | |_) \ V  V / ";
+Write-Host -ForegroundColor Red "       \___\___/ \__,_|\___|_|  |_.__/ \_/\_/  ";
+Write-Host -ForegroundColor Red "     ";
 Write-Host "";
 Write-Host -ForegroundColor Blue "   remaked by bridgezan   " -NoNewLine
 Write-Host -ForegroundColor Red "discord.gg/coderbw";
@@ -115,8 +116,8 @@ $Bam = Foreach ($Sid in $Users){$u++
                             'time to check' = $TimeLocal
 						    'akharin check time (UTC)'= $TimeUTC
 						    'akharin bari ke user check karde' = $TimeUser
-						     Application = 	$f
-						     Path =  		$path
+						     barname = 	$f
+						     makan =  		$path
                              Signature =          $Sig
 						     User =         $User
 						     SID =          $Sid
