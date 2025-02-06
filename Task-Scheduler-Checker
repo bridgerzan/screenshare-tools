@@ -1,7 +1,7 @@
-# مسیر فایل‌ها به دسکتاپ و پوشه tasks تغییر داده شد
+
 $desktopPath = [System.IO.Path]::Combine([System.Environment]::GetFolderPath('Desktop'), 'tasks')
 
-# بررسی و ایجاد پوشه اگر وجود نداشت
+
 if (!(Test-Path -Path $desktopPath)) {
     New-Item -ItemType Directory -Path $desktopPath | Out-Null
 }
@@ -26,7 +26,7 @@ $suspiciousKeywords = @(
     "MMC"
 )
 
-# تسک‌های پیش‌فرض ویندوز که باید نادیده گرفته شوند
+
 $defaultWindowsTasks = @(
     "\Microsoft\Windows",
     "\Microsoft\Office"
