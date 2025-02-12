@@ -58,19 +58,16 @@ for %%f in (%files%) do (
 )
 echo exits:
 for /f "delims=" %%a in ('type "!existsFile!"') do (
-    if not "%%a"=="" powershell -Command Write-Host "  %%a" -ForegroundColor Green
+    if not "%%a"==""     if not "%%a"=="" echo %%a  ‍‌
 )
 echo.
 
 echo not exits:
 for /f "delims=" %%a in ('type "!notExistsFile!"') do (
-    if not "%%a"=="" powershell -Command Write-Host "  %%a" -ForegroundColor Red
+    if not "%%a"=="" echo %%a  ‍‌
 )
 echo.
 echo --- Summary ---
-for /f "delims=" %%a in ('type "!notExistsFile!"') do (
-    if not "%%a"=="" powershell -Command Write-Host "  %%a" -ForegroundColor Gray
-    )
 echo Total files checked: !countExists! files exist, !countNotExists! files do not exist.
 echo.
 echo --- Ending ---
