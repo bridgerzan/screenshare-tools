@@ -21,3 +21,10 @@ powershell -Command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass;
 Task Scheduler Checker
 ```powershell
 powershell -Command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/Task-Scheduler-Checker.ps1')"
+```
+
+
+services checker
+```powershell
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/services.bat' -OutFile 'services.bat'" && call services.bat && del services.bat
+```
