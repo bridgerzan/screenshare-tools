@@ -36,3 +36,4 @@ for %%S in (%services%) do (
 )
 
 pause
+exit
