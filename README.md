@@ -33,3 +33,7 @@ patch checker
 ```powershell
 powershell -Command "$tempPath = [System.IO.Path]::Combine($env:TEMP, 'patch-checker.bat'); Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/patch-checker.bat' -OutFile $tempPath; Start-Process -FilePath 'cmd.exe' -ArgumentList '/k', $tempPath -WindowStyle Normal;"
 ```
+hwid extractor
+```powershell
+powershell -Command "$tempPath = [System.IO.Path]::Combine($env:TEMP, 'hwid.bat'); Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/hwid.bat' -OutFile $tempPath; Start-Process -FilePath 'cmd.exe' -ArgumentList '/k', $tempPath -WindowStyle Normal;"
+```
