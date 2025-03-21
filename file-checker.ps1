@@ -1,4 +1,4 @@
-﻿$pFile = "p.txt"
+$pFile = "p.txt"
 $outputFile = "SignatureResults.html"
 if (!(Test-Path $pFile)) {
     Write-Host "p.txt not found." -ForegroundColor Red
@@ -48,6 +48,8 @@ $html = @"
         tr:hover td { transform: scale(1.05); transition: all 0.2s ease-in-out; }
         .sort-menu { margin: 10px 0; }
         .sort-menu select { padding: 8px; font-size: 16px; border-radius: 5px; }
+        .search-bar { margin: 10px 0; }
+        .search-bar input { padding: 8px; font-size: 16px; border-radius: 5px; width: 200px; }
     </style>
     <script>
         function copyToClipboard(text) {
@@ -58,26 +60,57 @@ $html = @"
             });
         }
 
-        function sortTable(columnIndex) {
+        function sortTable(columnIndex, isDate = false) {
             var table = document.getElementById("fileTable");
             var rows = Array.from(table.rows).slice(1);
             var sortedRows = rows.sort(function(a, b) {
                 var cellA = a.cells[columnIndex].textContent.trim();
                 var cellB = b.cells[columnIndex].textContent.trim();
+                
+                if (isDate) {
+                    cellA = new Date(cellA);
+                    cellB = new Date(cellB);
+                }
+                
                 return cellA.localeCompare(cellB);
             });
             sortedRows.forEach(function(row) {
                 table.appendChild(row);
             });
         }
+
+        function searchFiles() {
+            var input = document.getElementById("searchInput").value.toLowerCase();
+            var table = document.getElementById("fileTable");
+            var rows = table.getElementsByTagName("tr");
+            for (var i = 1; i < rows.length; i++) {
+                var row = rows[i];
+                var cells = row.getElementsByTagName("td");
+                var match = false;
+                for (var j = 0; j < cells.length; j++) {
+                    if (cells[j].textContent.toLowerCase().includes(input)) {
+                        match = true;
+                        break;
+                    }
+                }
+                if (match) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        }
     </script>
 </head>
 <body>
     <div class="container">
         <h1>File Checker - bridgezan</h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" onkeyup="searchFiles()" placeholder="Search for files...">
+        </div>
         <div class="sort-menu">
             <label for="sortBy">Sort by: </label>
-            <select id="sortBy" onchange="sortTable(this.selectedIndex)">
+            <select id="sortBy" onchange="sortTable(this.selectedIndex, this.selectedIndex == 5)">
                 <option value="0">File Name</option>
                 <option value="1">Path</option>
                 <option value="2">Signature</option>
@@ -101,6 +134,7 @@ $html = @"
             </thead>
             <tbody>
 "@
+
 $checkedCount = 0
 $deletedCount = 0
 $invalidSignatureCount = 0
