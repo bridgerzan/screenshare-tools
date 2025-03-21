@@ -7,9 +7,14 @@ code ha
 👇
 
 
-ss tool
+all in one (use it on ss)
 ```powershell
-powershell -Command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/SSTool.ps1')"
+$desktop = [System.Environment]::GetFolderPath("Desktop")
+$folder = "$desktop\screenshare"
+New-Item -ItemType Directory -Path $folder -Force
+$zipPath = "$folder\screenshare.zip"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/screenshare.zip" -OutFile $zipPath
+Start-Process $folder
 ```
 
 
