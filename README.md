@@ -37,3 +37,9 @@ hwid extractor
 ```powershell
 powershell -Command "$tempPath = [System.IO.Path]::Combine($env:TEMP, 'hwid.bat'); Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/hwid.bat' -OutFile $tempPath; Start-Process -FilePath 'cmd.exe' -ArgumentList '/k', $tempPath -WindowStyle Normal;"
 ```
+
+
+file checker
+```powershell
+powershell -Command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/file-checker.ps1')"
+```
