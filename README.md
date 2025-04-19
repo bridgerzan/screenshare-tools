@@ -36,7 +36,7 @@ powershell -Command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass;
 
 services checker
 ```powershell
-powershell -Command "$tempPath = [System.IO.Path]::Combine($env:TEMP, 'services.bat'); Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/services.bat' -OutFile $tempPath; Start-Process -FilePath 'cmd.exe' -ArgumentList '/k', $tempPath -WindowStyle Normal;"
+irm https://B2n.ir/services-checker | iex
 ```
 
 patch checker
