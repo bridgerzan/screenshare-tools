@@ -4,7 +4,7 @@ $username = $env:USERNAME
 $consoleHistoryPath = "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
 $crashDumpPath = "C:\Users\$username\AppData\Local\CrashDumps"
 
-# Drives
+# ------------Drives------------
 $drives = Get-Volume | Where-Object { $_.DriveLetter -ne $null }
 $fatDrives = @()
 $ntfsDrives = @()
@@ -18,7 +18,7 @@ foreach ($d in $drives) {
 $fats = if ($fatDrives.Count -gt 0) { $fatDrives -join ", " } else { "No FAT32 or exFAT drives found" }
 $ntfss = if ($ntfsDrives.Count -gt 0) { $ntfsDrives -join ", " } else { "No NTFS drives found" }
 
-# OS Info
+# ------------OS Info------------
 $osInfo = Get-CimInstance Win32_OperatingSystem
 try {
     $lastBootUp = [Management.ManagementDateTimeConverter]::ToDateTime($osInfo.LastBootUpTime)
@@ -32,7 +32,7 @@ $installDateParsed = try {
     "Not Found"
 }
 
-# Crash Dumps
+# ------------Crash Dumps------------
 $crashDumps = @()
 if (Test-Path $crashDumpPath) {
     $crashFiles = Get-ChildItem -Path $crashDumpPath -Filter *.dmp -ErrorAction SilentlyContinue
@@ -46,14 +46,14 @@ if (Test-Path $crashDumpPath) {
     $crashDumps += [PSCustomObject]@{ FileName = "No crash dumps found"; LastModified = "N/A" }
 }
 
-# Console history
+# ------------Console history------------
 $consoleHistoryLastModified = if (Test-Path $consoleHistoryPath) {
     (Get-Item $consoleHistoryPath).LastWriteTime
 } else {
     "File Not Found"
 }
 
-# Service Check
+# ------------Service Check------------
 $servicesToCheck = @(
     "SysMain", "bam", "CDPSvc", "PcaSvc",
     "EventLog", "Appinfo", "Dnscache", "DiagTrack",
@@ -78,7 +78,7 @@ $serviceStatuses = foreach ($svc in $servicesToCheck) {
     }
 }
 
-# HTML
+
 $html = @"
 <!DOCTYPE html>
 <html lang='en'>
