@@ -126,7 +126,7 @@ foreach ($path in $logPaths) {
             $containsDontLog = $false
             try {
                 $content = Get-Content $logFiles.FullName -Raw -ErrorAction Stop
-                if ($content -match "dont log", "don't log") {
+                if ($content -match "don'?t log") {
                     $containsDontLog = $true
                 }
             } catch {
