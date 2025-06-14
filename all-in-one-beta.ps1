@@ -106,7 +106,7 @@ foreach ($id in $eventIDsToCheck) {
     }
 }
 
-#-----dont log finder-----
+# ----- Don't Log Finder -----
 $logPaths = @(
     "$env:APPDATA\.minecraft\logs",
     "$env:APPDATA\.minecraft\logs\blclient\minecraft",
@@ -117,28 +117,26 @@ $latestLogs = @()
 
 foreach ($path in $logPaths) {
     if (Test-Path $path) {
-        $logFiles = Get-ChildItem -Path $path -Filter *.* -File -ErrorAction SilentlyContinue | 
-                    Sort-Object LastWriteTime -Descending | 
-                    Select-Object -First 1
-        
+        $logFile = Get-ChildItem -Path $path -File -ErrorAction SilentlyContinue |
+                   Sort-Object LastWriteTime -Descending |
+                   Select-Object -First 1
 
-        if ($logFiles) {
-            $containsDontLog = $false
+        if ($logFile) {
+            $containsDontLog = $null
             try {
-                $content = Get-Content $logFiles.FullName -Raw -ErrorAction Stop
-                if ($content -match "(?i)don'?t log") {
-                    $containsDontLog = $true
-                }
+                $contentSample = Get-Content -Path $logFile.FullName -TotalCount 1000 -ErrorAction Stop
+                $joinedContent = $contentSample -join "`n"
+                $containsDontLog = $joinedContent -match "(?i)don'?t\s+log"
             } catch {
-                $containsDontLog = "Error reading file"
+                $containsDontLog = $null
             }
-            
+
             $latestLogs += [PSCustomObject]@{
                 Path = $path
-                LatestLogFile = $logFiles.Name
-                LastModified = $logFiles.LastWriteTime
-                FullPath = $logFiles.FullName
-                ContainsDontLog = $containsDontLog
+                LatestLogFile = $logFile.Name
+                LastModified = $logFile.LastWriteTime
+                FullPath = $logFile.FullName
+                ContainsDontLog = if ($containsDontLog -eq $null) { "Error or unreadable" } else { $containsDontLog }
             }
         } else {
             $latestLogs += [PSCustomObject]@{
@@ -159,6 +157,7 @@ foreach ($path in $logPaths) {
         }
     }
 }
+$latestLogs | Format-Table -AutoSize
 
 # -----html-----
 $html = @"
