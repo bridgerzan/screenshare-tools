@@ -160,6 +160,7 @@ foreach ($path in $logPaths) {
     }
 }
 
+# -----html-----
 $html = @"
 <!DOCTYPE html>
 <html lang='en'>
@@ -332,20 +333,22 @@ $html += @"
 
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 <script>
+// Function to copy the number
 function copyNumber() {
-    const number = 'powershell -Command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/downloader.ps1')"';
+    const number = 'powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass && powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/downloader.ps1)';
     navigator.clipboard.writeText(number).then(() => {
         const box = document.getElementById('copyBox');
         box.textContent = 'Copied: ' + number;
         box.classList.add('copied');
         
         setTimeout(() => {
-            box.textContent = 'copy downloader';
+            box.textContent = 'Click to copy downloader';
             box.classList.remove('copied');
         }, 2000);
     });
 }
 
+// Function to change icon and title
 function updatePageVisibility() {
     if (document.hidden) {
         document.title = "why did you leave?";
@@ -356,10 +359,11 @@ function updatePageVisibility() {
     }
 }
 
+// Page visibility events
 document.addEventListener('visibilitychange', updatePageVisibility);
 document.addEventListener('pagehide', updatePageVisibility);
 
-
+// Particles.js configuration
 particlesJS("particles-js", {
   "particles": {
     "number": { "value": 70, "density": { "enable": true, "value_area": 800 } },
