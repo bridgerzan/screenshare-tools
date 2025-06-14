@@ -49,7 +49,7 @@ Invoke-WebRequest -Uri $url -OutFile $zipPath
 Write-ProgressMessage "Download completed."
 
 Start-Process $folderPath
-
+pause
 Write-Host "Press Enter to delete the downloaded ZIP file and exit..." -ForegroundColor Magenta
 [void][System.Console]::ReadLine()
 
