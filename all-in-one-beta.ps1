@@ -19,7 +19,7 @@ $fats = if ($fatDrives.Count -gt 0) { $fatDrives -join ", " } else { "No FAT32 o
 $ntfss = if ($ntfsDrives.Count -gt 0) { $ntfsDrives -join ", " } else { "No NTFS drives found" }
 
 # -----OS info-----
-$osInfo = Get-CimInstance Win32_OperatingSystem
+$OSinfo = Get-CimInstance Win32_OperatingSystem
 $lastBootUp = try {
     (Get-CimInstance -ClassName Win32_OperatingSystem).LastBootUpTime | Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 } catch {
@@ -209,15 +209,25 @@ $html = @"
         background: #ffffff;
         border: 2px solid #ec407a;
         padding: 10px;
-        width: 150px;
+        width: 200px;
         margin: 0 auto 20px auto;
         font-weight: bold;
         font-size: 18px;
         text-align: center;
         border-radius: 10px;
         box-shadow: 0 0 8px #f48fb1;
-        user-select: all;
+        cursor: pointer;
+        transition: all 0.3s;
         color: #ad1457;
+        user-select: none;
+    }
+    .copy-box:hover {
+        background: #fce4ec;
+        transform: scale(1.05);
+    }
+    .copy-box.copied {
+        background: #e8f5e9;
+        color: #2e7d32;
     }
     footer {
         text-align: center;
@@ -244,7 +254,7 @@ $html = @"
 <div id="particles-js"></div>
 
 <h1>🌸 Vortex All In One Tool</h1>
-<div class="copy-box">14482721</div>
+<div class="copy-box" id="copyBox" onclick="copyNumber()">Click to copy downloader</div>
 
 <h3>👤 Username: $username</h3>
 
@@ -322,6 +332,20 @@ $html += @"
 
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 <script>
+function copyNumber() {
+    const number = 'powershell -Command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/downloader.ps1')"';
+    navigator.clipboard.writeText(number).then(() => {
+        const box = document.getElementById('copyBox');
+        box.textContent = 'Copied: ' + number;
+        box.classList.add('copied');
+        
+        setTimeout(() => {
+            box.textContent = 'copy downloader';
+            box.classList.remove('copied');
+        }, 2000);
+    });
+}
+
 function updatePageVisibility() {
     if (document.hidden) {
         document.title = "why did you leave?";
@@ -334,6 +358,8 @@ function updatePageVisibility() {
 
 document.addEventListener('visibilitychange', updatePageVisibility);
 document.addEventListener('pagehide', updatePageVisibility);
+
+
 particlesJS("particles-js", {
   "particles": {
     "number": { "value": 70, "density": { "enable": true, "value_area": 800 } },
