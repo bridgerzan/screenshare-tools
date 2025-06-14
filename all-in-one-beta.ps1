@@ -158,7 +158,7 @@ foreach ($path in $logPaths) {
     }
 }
 $latestLogs | Format-Table -AutoSize
-
+cls
 # -----html-----
 $html = @"
 <!DOCTYPE html>
