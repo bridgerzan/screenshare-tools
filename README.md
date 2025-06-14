@@ -11,7 +11,10 @@ all in one (use it on ss)
 ```powershell
 powershell -Command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/all-in-one-beta.ps1')"
 ```
-
+Downloader
+```powershell
+powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass && powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/downloader.ps1)
+```
 CookedCli (oceancli runner)
 ```powershell
 irm https://B2n.ir/CookedCLI | iex
