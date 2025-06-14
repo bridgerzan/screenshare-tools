@@ -1,10 +1,10 @@
-﻿[Console]::OutputEncoding = [Text.UTF8Encoding]::new()
+[Console]::OutputEncoding = [Text.UTF8Encoding]::new()
 
 $username = $env:USERNAME
 $consoleHistoryPath = "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
 $crashDumpPath = "C:\Users\$username\AppData\Local\CrashDumps"
 
-# ------------Drives------------
+# -----formats-----
 $drives = Get-Volume | Where-Object { $_.DriveLetter -ne $null }
 $fatDrives = @()
 $ntfsDrives = @()
@@ -18,21 +18,21 @@ foreach ($d in $drives) {
 $fats = if ($fatDrives.Count -gt 0) { $fatDrives -join ", " } else { "No FAT32 or exFAT drives found" }
 $ntfss = if ($ntfsDrives.Count -gt 0) { $ntfsDrives -join ", " } else { "No NTFS drives found" }
 
-# ------------OS Info------------
+# -----OS info-----
 $osInfo = Get-CimInstance Win32_OperatingSystem
-try {
-    $lastBootUp = [Management.ManagementDateTimeConverter]::ToDateTime($osInfo.LastBootUpTime)
+$lastBootUp = try {
+    (Get-CimInstance -ClassName Win32_OperatingSystem).LastBootUpTime | Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 } catch {
-    $lastBootUp = "Unavailable"
+    "Unavailable"
 }
 
 $installDateParsed = try {
-    [Management.ManagementDateTimeConverter]::ToDateTime($osInfo.InstallDate)
+    (Get-CimInstance -ClassName Win32_OperatingSystem).InstallDate | Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 } catch {
     "Not Found"
 }
 
-# ------------Crash Dumps------------
+# -----crash dumps-----
 $crashDumps = @()
 if (Test-Path $crashDumpPath) {
     $crashFiles = Get-ChildItem -Path $crashDumpPath -Filter *.dmp -ErrorAction SilentlyContinue
@@ -46,14 +46,14 @@ if (Test-Path $crashDumpPath) {
     $crashDumps += [PSCustomObject]@{ FileName = "No crash dumps found"; LastModified = "N/A" }
 }
 
-# ------------Console history------------
+# -----console history-----
 $consoleHistoryLastModified = if (Test-Path $consoleHistoryPath) {
     (Get-Item $consoleHistoryPath).LastWriteTime
 } else {
     "File Not Found"
 }
 
-# ------------Service Check------------
+# -----service check-----
 $servicesToCheck = @(
     "SysMain", "bam", "CDPSvc", "PcaSvc",
     "EventLog", "Appinfo", "Dnscache", "DiagTrack",
@@ -78,6 +78,87 @@ $serviceStatuses = foreach ($svc in $servicesToCheck) {
     }
 }
 
+# -----event log check-----
+$eventIDsToCheck = @(3079, 4616, 4634, 1102)
+$eventLogResults = @()
+
+foreach ($id in $eventIDsToCheck) {
+    $logName = if ($id -in 3079) { "Application" } else { "Security" }
+    
+    $events = Get-WinEvent -LogName $logName -FilterXPath "*[System[EventID=$id]]" -MaxEvents 5 -ErrorAction SilentlyContinue
+    
+    if ($events) {
+        foreach ($event in $events) {
+            $eventLogResults += [PSCustomObject]@{
+                EventID = $id
+                LogName = $logName
+                TimeCreated = $event.TimeCreated
+                Message = ($event.Message -split "`n")[0] 
+            }
+        }
+    } else {
+        $eventLogResults += [PSCustomObject]@{
+            EventID = $id
+            LogName = $logName
+            TimeCreated = "No events found"
+            Message = "N/A"
+        }
+    }
+}
+
+#-----dont log finder-----
+$logPaths = @(
+    "$env:APPDATA\.minecraft\logs",
+    "$env:APPDATA\.minecraft\logs\blclient\minecraft",
+    "$env:USERPROFILE\.lunarclient\logs\game"
+)
+
+$latestLogs = @()
+
+foreach ($path in $logPaths) {
+    if (Test-Path $path) {
+        $logFiles = Get-ChildItem -Path $path -Filter *.* -File -ErrorAction SilentlyContinue | 
+                    Sort-Object LastWriteTime -Descending | 
+                    Select-Object -First 1
+        
+
+        if ($logFiles) {
+            $containsDontLog = $false
+            try {
+                $content = Get-Content $logFiles.FullName -Raw -ErrorAction Stop
+                if ($content -match "dont log") {
+                    $containsDontLog = $true
+                }
+            } catch {
+                $containsDontLog = "Error reading file"
+            }
+            
+            $latestLogs += [PSCustomObject]@{
+                Path = $path
+                LatestLogFile = $logFiles.Name
+                LastModified = $logFiles.LastWriteTime
+                FullPath = $logFiles.FullName
+                ContainsDontLog = $containsDontLog
+            }
+        } else {
+            $latestLogs += [PSCustomObject]@{
+                Path = $path
+                LatestLogFile = "No files found"
+                LastModified = "N/A"
+                FullPath = "N/A"
+                ContainsDontLog = "N/A"
+            }
+        }
+    } else {
+        $latestLogs += [PSCustomObject]@{
+            Path = $path
+            LatestLogFile = "Directory not found"
+            LastModified = "N/A"
+            FullPath = "N/A"
+            ContainsDontLog = "N/A"
+        }
+    }
+}
 
 $html = @"
 <!DOCTYPE html>
@@ -85,6 +166,7 @@ $html = @"
 <head>
 <meta charset='UTF-8'>
 <title>Vortex All In One Tool</title>
+<link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
 <style>
     body {
         margin: 0;
@@ -148,6 +230,14 @@ $html = @"
         text-decoration: none;
         font-weight: bold;
     }
+    .found {
+        color: #2e7d32;
+        font-weight: bold;
+    }
+    .not-found {
+        color: #c62828;
+        font-weight: bold;
+    }
 </style>
 </head>
 <body>
@@ -195,6 +285,36 @@ foreach ($svc in $serviceStatuses) {
 $html += @"
 </table>
 
+<h2>📋 Event Logs</h2>
+<table><tr><th>Event ID</th><th>Log Name</th><th>Time Created</th><th>Message</th></tr>
+"@
+
+foreach ($event in $eventLogResults) {
+    $html += "<tr><td>$($event.EventID)</td><td>$($event.LogName)</td><td>$($event.TimeCreated)</td><td>$($event.Message)</td></tr>`n"
+}
+
+$html += @"
+</table>
+
+<h2>🔍 Don't Log Finder</h2>
+<table><tr><th>Log Path</th><th>Latest Log File</th><th>Last Modified</th><th>Contains "dont log"</th></tr>
+"@
+
+foreach ($log in $latestLogs) {
+    $dontLogStatus = if ($log.ContainsDontLog -eq $true) {
+        "<span class='found'>✅ Found</span>"
+    } elseif ($log.ContainsDontLog -eq $false) {
+        "<span class='not-found'>❌ Not found</span>"
+    } else {
+        $log.ContainsDontLog
+    }
+    
+    $html += "<tr><td>$($log.Path)</td><td>$($log.LatestLogFile)</td><td>$($log.LastModified)</td><td>$dontLogStatus</td></tr>`n"
+}
+
+$html += @"
+</table>
+
 <footer>
     <p>🔗 Join our Discord: <a href="https://discord.gg/maWx9njuty" target="_blank">discord.gg/maWx9njuty</a></p>
     <p>created by bridgezan</p>
@@ -202,6 +322,18 @@ $html += @"
 
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 <script>
+function updatePageVisibility() {
+    if (document.hidden) {
+        document.title = "why did you leave?";
+        document.getElementById('favicon').href = "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍓</text></svg>";
+    } else {
+        document.title = "Vortex All In One Tool";
+        document.getElementById('favicon').href = "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>";
+    }
+}
+
+document.addEventListener('visibilitychange', updatePageVisibility);
+document.addEventListener('pagehide', updatePageVisibility);
 particlesJS("particles-js", {
   "particles": {
     "number": { "value": 70, "density": { "enable": true, "value_area": 800 } },
@@ -237,7 +369,7 @@ particlesJS("particles-js", {
 </html>
 "@
 
-# ذخیره فایل HTML
+# -----save to temp-----
 $outFile = "$env:TEMP\VortexAllInOneTool.html"
 $html | Out-File -FilePath $outFile -Encoding utf8
 Start-Process $outFile
