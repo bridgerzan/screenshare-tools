@@ -8,6 +8,7 @@ $newBuffer = $psWindow.BufferSize
 $newBuffer.Width = 80
 $newBuffer.Height = 1000
 $psWindow.BufferSize = $newBuffer
+cls
 $bannerLines = @(
 " __      ______  _____ _______ ________   __",
 " \ \    / / __ \|  __ \__   __|  ____\ \ / /",
