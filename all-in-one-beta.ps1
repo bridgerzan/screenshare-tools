@@ -402,3 +402,4 @@ particlesJS("particles-js", {
 $outFile = "$env:TEMP\VortexAllInOneTool.html"
 $html | Out-File -FilePath $outFile -Encoding utf8
 Start-Process $outFile
+cls
