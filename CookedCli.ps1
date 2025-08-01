@@ -1,4 +1,3 @@
-# check admin
 if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
     Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Definition)`"" -Verb RunAs
     exit
@@ -6,110 +5,95 @@ if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 $Host.UI.RawUI.BackgroundColor = "Black"
 $Host.UI.RawUI.ForegroundColor = "White"
 $Host.PrivateData.ErrorForegroundColor = "Red"
-$Host.PrivateData.ErrorBackgroundColor = "Black"
 $Host.PrivateData.WarningForegroundColor = "Yellow"
-$Host.PrivateData.WarningBackgroundColor = "Black"
 Clear-Host
 Write-Host @"
-
-   _____            _            _  _____ _ _ 
+   _____            _            _  _____ _ _
   / ____|          | |          | |/ ____| (_)
- | |     ___   ___ | | _____  __| | |    | |_ 
+ | |     ___   ___ | | _____  __| | |    | |_
  | |    / _ \ / _ \| |/ / _ \/ _` | |    | | |
  | |___| (_) | (_) |   <  __/ (_| | |____| | |
   \_____\___/ \___/|_|\_\___|\__,_|\_____|_|_|
-                 by bridgezan                                      
+                 by bridgezan
 "@ -ForegroundColor Cyan
-# check antivirus
-function Check-RealTimeProtection {
-    try {
-        $defenderStatus = Get-MpComputerStatus -ErrorAction Stop
-        return $defenderStatus.RealtimeProtectionEnabled
-    }
-    catch {
-        Write-Host "Error checking Defender status: $_" -ForegroundColor Red
-        return $null
-    }
+$desktopPath = [Environment]::GetFolderPath("Desktop")
+$folderPath = Join-Path $desktopPath "CookedCLI"
+$psexecPath = Join-Path $folderPath "PsExec.exe"
+$oceanPath = Join-Path $folderPath "oceancli.exe"
+$psexecUrl = "https://abrehamrahi.ir/o/public/xOyBcjow/"
+$oceanUrl = "https://anticheat.ac/downloads/general/cli"
+if (-not (Test-Path $folderPath)) {
+    Write-Host "`n[1/5] Creating folder..." -ForegroundColor Yellow
+    New-Item -ItemType Directory -Path $folderPath | Out-Null
+} else {
+    Write-Host "`n[1/5] Folder already exists." -ForegroundColor DarkGray
 }
-:mainloop while ($true) {
-    Write-Host "`nChecking Real-Time Protection status..." -ForegroundColor Yellow
-    $rtpStatus = Check-RealTimeProtection
-    if ($rtpStatus -eq $true) {
-        Write-Host "Real-Time Protection is: ON" -ForegroundColor Red
-        Write-Host "`nOpening Windows Security settings..." -ForegroundColor Yellow
-        Start-Process "windowsdefender:" -Wait
-        $choice = Read-Host "`nAfter disabling Real-Time Protection, choose an option:`n[1] Check again (Press Y)`n[2] Skip and continue (Press S)`n[3] Exit (Press any other key)"
-        switch ($choice.ToLower()) {
-            'y' { 
-                Write-Host "Checking again..." -ForegroundColor Cyan
-                continue mainloop
-            }
-            's' {
-                Write-Host "Skipping Real-Time Protection check..." -ForegroundColor Yellow
-                break mainloop
-            }
-            default {
-                Write-Host "Exiting script..." -ForegroundColor Yellow
-                exit
-            }
-        }
+if (-not (Test-Path $psexecPath)) {
+    Write-Host "`n[2/5] Downloading PsExec.exe..." -ForegroundColor Yellow
+    try {
+        Invoke-WebRequest -Uri $psexecUrl -OutFile $psexecPath -ErrorAction Stop
+        Write-Host "PsExec.exe downloaded successfully." -ForegroundColor Green
+    } catch {
+        Write-Host "Error downloading PsExec.exe: $_" -ForegroundColor Red
+        exit
     }
-    elseif ($rtpStatus -eq $false) {
-        Write-Host "Real-Time Protection is: OFF" -ForegroundColor Green
-        break
-    }
-    else {
-        Write-Host "Could not determine Real-Time Protection status" -ForegroundColor Yellow
-        $choice = Read-Host "Continue anyway? (y/n)"
-        if ($choice -ne 'y') {
+} else {
+    Write-Host "`n[2/5] PsExec.exe already exists." -ForegroundColor DarkGray
+}
+Write-Host "`n[3/5] Do you want to download oceancli.exe automatically?" -ForegroundColor Yellow
+Write-Host "[Y] Yes, (not recommanded)" -ForegroundColor Cyan
+Write-Host "[N] No, I will download it manually and paste it in the folder" -ForegroundColor Magenta
+$choice = Read-Host "Choose Y or N"
+if ($choice.ToLower() -eq "y") {
+    try {
+        Invoke-WebRequest -Uri $oceanUrl -OutFile $oceanPath -ErrorAction Stop
+        Write-Host "oceancli.exe downloaded successfully." -ForegroundColor Green
+    } catch {
+        Write-Host "`n[!] Failed to download oceancli.exe automatically." -ForegroundColor Red
+        Write-Host "→ Please download manually from:" -ForegroundColor Cyan
+        Write-Host $oceanUrl -ForegroundColor Magenta
+        Write-Host "Then paste it into the folder below and type Y to continue." -ForegroundColor Yellow
+        Write-Host $folderPath -ForegroundColor Cyan
+        do {
+            $confirm = Read-Host "Type Y when you pasted oceancli.exe"
+        } until ($confirm.ToLower() -eq "y")
+
+        if (-not (Test-Path $oceanPath)) {
+            Write-Host "`n[x] oceancli.exe not found in folder" -ForegroundColor Red
             exit
         }
-        break
     }
-}
-
-
-# make folder
-Write-Host "`n[2/5] Creating CookedCLI folder on desktop..." -ForegroundColor Yellow
-$desktopPath = [Environment]::GetFolderPath("Desktop")
-$folderPath = Join-Path -Path $desktopPath -ChildPath "CookedCLI"
-
-if (-not (Test-Path -Path $folderPath)) {
-    New-Item -ItemType Directory -Path $folderPath -Force | Out-Null
-    Write-Host "Folder created: $folderPath" -ForegroundColor Green
-}
-else {
-    Write-Host "Folder already exists." -ForegroundColor Yellow
-}
-
-# download file
-Write-Host "`n[3/5] Downloading OceanCLI.exe..." -ForegroundColor Yellow
-$downloadUrl = "https://abrehamrahi.ir/o/public/PK5PBRdQ"
-$outputFile = Join-Path -Path $folderPath -ChildPath "CookedCLI.exe"
-
-try {
-    Invoke-WebRequest -Uri $downloadUrl -OutFile $outputFile -ErrorAction Stop
-    Write-Host "Download completed successfully." -ForegroundColor Green
-}
-catch {
-    Write-Host "Download error: $_" -ForegroundColor Red
+} elseif ($choice.ToLower() -eq "n") {
+    Write-Host "`n→ Please download manually from:" -ForegroundColor Cyan
+    Write-Host $oceanUrl -ForegroundColor Magenta
+    Write-Host "Then paste it into the folder below and type Y to continue." -ForegroundColor Yellow
+    Write-Host $folderPath -ForegroundColor Cyan
+    do {
+        $confirm = Read-Host "Type Y when you’ve pasted oceancli.exe"
+    } until ($confirm.ToLower() -eq "y")
+    if (-not (Test-Path $oceanPath)) {
+        Write-Host "`n[×] oceancli.exe not found in folder. Exiting." -ForegroundColor Red
+        exit
+    }
+} else {
+    Write-Host "[!] Invalid choice. Exiting." -ForegroundColor Red
     exit
 }
-
-#  ask pin
-Write-Host "`n[4/5] Getting PIN..." -ForegroundColor Yellow
-$pin = Read-Host "Enter your PIN" -AsSecureString
-$pinPlain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pin))
-
-# run file
-Write-Host "`n[5/5] Running CookedCLI.exe..." -ForegroundColor Yellow
+Write-Host "`n[4/5] Enter your PIN :" -ForegroundColor Yellow
+$pin = Read-Host "PIN"
+if (-not $pin) {
+    Write-Host "PIN is empty. Exiting." -ForegroundColor Red
+    exit
+}
+$cmdToRun = 'cmd.exe /c cd /d "' + $folderPath + '" && start "" /HIGH oceancli.exe ' + $pin
+$psexecArgs = "-accepteula -i -s $cmdToRun"
+Write-Host "`n[5/5] Launching OceanCLI" -ForegroundColor Yellow
 try {
-    Start-Process -FilePath "$folderPath\CookedCLI.exe" -ArgumentList $pinPlain -Wait -NoNewWindow -ErrorAction Stop
-    Write-Host "Program executed successfully." -ForegroundColor Green
+    Start-Process -FilePath $psexecPath -ArgumentList $psexecArgs -WorkingDirectory $folderPath
+    Write-Host "`nOceanCLI launched successfully" -ForegroundColor Green
+} catch {
+    Write-Host "Error launching CMD: $_" -ForegroundColor Red
 }
-catch {
-    Write-Host "Execution error: $_" -ForegroundColor Red
-}
-
-Write-Host "`nOperation completed. Press any key to exit..." -ForegroundColor Cyan
+Write-Host "`ncomplete. Press any key to exit this window." -ForegroundColor Cyan
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+exit
