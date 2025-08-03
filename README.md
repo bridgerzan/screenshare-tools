@@ -17,7 +17,7 @@ powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass && powersh
 ```
 CookedCli (oceancli runner)
 ```powershell
-powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass && powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/CookedCli.ps1)
+iex (irm 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/CookedCli.ps1')
 ```
 
 Task Scheduler Checker
