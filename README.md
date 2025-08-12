@@ -15,10 +15,6 @@ Downloader
 ```powershell
 powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass && powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/downloader.ps1)
 ```
-CookedCli (oceancli runner)
-```powershell
-iex (irm 'https://raw.githubusercontent.com/bridgerzan/screenshare-tools/refs/heads/main/CookedCli.ps1')
-```
 
 Task Scheduler Checker
 ```powershell
